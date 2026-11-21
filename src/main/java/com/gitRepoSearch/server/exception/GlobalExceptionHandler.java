@@ -19,6 +19,7 @@ import java.util.stream.Collectors;
 @RestControllerAdvice
 public class GlobalExceptionHandler {
 
+    // Error on Github side
     @ExceptionHandler(RestClientResponseException.class)
     public ResponseEntity<ApiError> handleGitHubError(RestClientResponseException e) {
         int upstream = e.getStatusCode().value();
@@ -42,6 +43,7 @@ public class GlobalExceptionHandler {
         return ResponseEntity.status(HttpStatus.BAD_GATEWAY).body(new ApiError("GitHub request failed"));
     }
 
+    //Error reaching github
    @ExceptionHandler(ResourceAccessException.class)
    public ResponseEntity<ApiError> handleGithubUnreachable(ResourceAccessException e){
         log.warn("GitHub unreachable",e);
@@ -50,12 +52,14 @@ public class GlobalExceptionHandler {
 
    }
 
+   // Error while updating / retreiving data
    @ExceptionHandler(DataAccessException.class)
     public ResponseEntity<ApiError> handleDatabaseError(DataAccessException e){
         return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
                 .body(new ApiError("Could not save the repositories"));
    }
 
+   // Bad response from Github
     @ExceptionHandler(RestClientException.class)
     public ResponseEntity<ApiError> handleInvalidGithubResponse(RestClientException e) {
         log.warn("Invalid response from GitHub", e);
@@ -63,6 +67,7 @@ public class GlobalExceptionHandler {
                 .body(new ApiError("GitHub returned an invalid response"));
     }
 
+    // Validation Errors
     @ExceptionHandler(BindException.class)
     public ResponseEntity<ApiError> handleValidation(BindException e) {
         String message = e.getBindingResult().getFieldErrors().stream()
@@ -71,6 +76,7 @@ public class GlobalExceptionHandler {
         return ResponseEntity.badRequest().body(new ApiError(message));
     }
 
+    // Malformed request
     @ExceptionHandler(HttpMessageNotReadableException.class)
     public ResponseEntity<ApiError> handleUnreadableBody(HttpMessageNotReadableException e) {
         return ResponseEntity.badRequest()
